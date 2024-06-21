@@ -1,7 +1,8 @@
-// fe/my-app/app/question/[id].tsx
+"use client";
+
 import React, { useState } from "react";
-import { useRouter } from "next/router";
-import QuestionLayout from "../components/QuestionLayout";
+import { useRouter, useParams } from "next/navigation";
+import QuestionLayout from "@/components/QuestionLayout";
 
 const questions = [
   {
@@ -29,8 +30,9 @@ const questions = [
 
 const QuestionPage: React.FC = () => {
   const router = useRouter();
-  const { id } = router.query;
-  const questionId = parseInt(id as string, 10);
+  const params = useParams();
+  const id = Array.isArray(params.id) ? params.id[0] : params.id;
+  const questionId = parseInt(id, 10);
   const question = questions.find((q) => q.id === questionId);
 
   const [answers, setAnswers] = useState<{ [key: number]: string | string[] }>(
@@ -62,7 +64,6 @@ const QuestionPage: React.FC = () => {
     if (questionId < questions.length) {
       router.push(`/question/${questionId + 1}`);
     } else {
-      // Submit answers to the backend or handle the end of the questionnaire
       console.log("Completed", answers);
     }
   };

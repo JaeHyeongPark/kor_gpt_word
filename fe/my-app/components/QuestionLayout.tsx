@@ -1,12 +1,11 @@
 // fe/my-app/app/component/QuestionLayout.tsx
 import React from "react";
 import Link from "next/link";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 interface QuestionLayoutProps {
   children: React.ReactNode;
   question: string;
-  //   questionType: "text" | "multiple";
   currentQuestion: number;
 }
 
