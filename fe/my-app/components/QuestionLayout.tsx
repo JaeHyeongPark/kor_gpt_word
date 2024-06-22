@@ -3,6 +3,8 @@ import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import BackIcon from "@/components/BackIcon";
+
 interface QuestionLayoutProps {
   children: React.ReactNode;
   question: string;
@@ -22,9 +24,9 @@ const QuestionLayout: React.FC<QuestionLayoutProps> = ({
         {currentQuestion > 1 && (
           <button
             onClick={() => router.push(`/question/${currentQuestion - 1}`)}
-            className="bg-blue-500 text-white px-4 py-2 rounded"
+            className="flex items-center bg-transparent px-4 py-2"
           >
-            Back
+            <BackIcon />
           </button>
         )}
         <div className="w-20"></div>

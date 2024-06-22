@@ -35,6 +35,10 @@ const QuestionPage: React.FC = () => {
   const questionId = parseInt(id, 10);
   const question = questions.find((q) => q.id === questionId);
 
+  const [answers, setAnswers] = useState<{ [key: number]: string | string[] }>(
+    {}
+  );
+
   // 로컬 스토리지에서 상태를 읽어오자
   useEffect(() => {
     const savedAnswers = localStorage.getItem("answers");
@@ -43,10 +47,6 @@ const QuestionPage: React.FC = () => {
     }
   }, []);
 
-  const [answers, setAnswers] = useState<{ [key: number]: string | string[] }>(
-    {}
-  );
-
   // 상태가 업데이트될 때마다 로컬 스토리지에 저장
   useEffect(() => {
     localStorage.setItem("answers", JSON.stringify(answers));
@@ -54,22 +54,21 @@ const QuestionPage: React.FC = () => {
 
   if (!question) return <p>Question not found</p>;
 
-  const handleChoiceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { value } = e.target;
+  const handleChoiceChange = (choice: string) => {
     if (question.multiple) {
       setAnswers((prev) => {
         const currentAnswers = (prev[questionId] as string[]) || [];
-        if (currentAnswers.includes(value)) {
+        if (currentAnswers.includes(choice)) {
           return {
             ...prev,
-            [questionId]: currentAnswers.filter((answer) => answer !== value),
+            [questionId]: currentAnswers.filter((answer) => answer !== choice),
           };
         } else {
-          return { ...prev, [questionId]: [...currentAnswers, value] };
+          return { ...prev, [questionId]: [...currentAnswers, choice] };
         }
       });
     } else {
-      setAnswers({ ...answers, [questionId]: value });
+      setAnswers({ ...answers, [questionId]: choice });
     }
   };
 
@@ -83,25 +82,27 @@ const QuestionPage: React.FC = () => {
 
   return (
     <QuestionLayout question={question.question} currentQuestion={questionId}>
-      {/* <div onChange={handleChoiceChange}> */}
-      {question.choices.map((choice, index) => (
-        <label key={index} className="block">
-          <input
-            type={question.multiple ? "checkbox" : "radio"}
-            name={`choice-${questionId}`}
-            value={choice}
-            className="mr-2"
-            checked={
-              question.multiple
-                ? ((answers[questionId] as string[]) || []).includes(choice)
-                : answers[questionId] === choice
-            }
-            onChange={handleChoiceChange}
-          />
-          {choice}
-        </label>
-      ))}
-      {/* </div> */}
+      <div className="space-y-2">
+        {question.choices.map((choice, index) => {
+          const isSelected = question.multiple
+            ? ((answers[questionId] as string[]) || []).includes(choice)
+            : answers[questionId] === choice;
+          return (
+            <button
+              key={index}
+              type="button"
+              className={`block w-full py-3 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-full border ${
+                isSelected
+                  ? "bg-blue-600 text-white"
+                  : "bg-white border-gray-300 text-gray-700"
+              } hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none`}
+              onClick={() => handleChoiceChange(choice)}
+            >
+              {choice}
+            </button>
+          );
+        })}
+      </div>
       <button
         onClick={handleSubmit}
         className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
