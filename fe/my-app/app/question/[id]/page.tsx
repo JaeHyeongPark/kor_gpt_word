@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import QuestionLayout from "@/components/QuestionLayout";
 
@@ -35,9 +35,22 @@ const QuestionPage: React.FC = () => {
   const questionId = parseInt(id, 10);
   const question = questions.find((q) => q.id === questionId);
 
+  // 로컬 스토리지에서 상태를 읽어오자
+  useEffect(() => {
+    const savedAnswers = localStorage.getItem("answers");
+    if (savedAnswers) {
+      setAnswers(JSON.parse(savedAnswers));
+    }
+  }, []);
+
   const [answers, setAnswers] = useState<{ [key: number]: string | string[] }>(
     {}
   );
+
+  // 상태가 업데이트될 때마다 로컬 스토리지에 저장
+  useEffect(() => {
+    localStorage.setItem("answers", JSON.stringify(answers));
+  }, [answers]);
 
   if (!question) return <p>Question not found</p>;
 
@@ -70,24 +83,25 @@ const QuestionPage: React.FC = () => {
 
   return (
     <QuestionLayout question={question.question} currentQuestion={questionId}>
-      <div onChange={handleChoiceChange}>
-        {question.choices.map((choice, index) => (
-          <label key={index} className="block">
-            <input
-              type={question.multiple ? "checkbox" : "radio"}
-              name={`choice-${questionId}`}
-              value={choice}
-              className="mr-2"
-              checked={
-                question.multiple
-                  ? ((answers[questionId] as string[]) || []).includes(choice)
-                  : answers[questionId] === choice
-              }
-            />
-            {choice}
-          </label>
-        ))}
-      </div>
+      {/* <div onChange={handleChoiceChange}> */}
+      {question.choices.map((choice, index) => (
+        <label key={index} className="block">
+          <input
+            type={question.multiple ? "checkbox" : "radio"}
+            name={`choice-${questionId}`}
+            value={choice}
+            className="mr-2"
+            checked={
+              question.multiple
+                ? ((answers[questionId] as string[]) || []).includes(choice)
+                : answers[questionId] === choice
+            }
+            onChange={handleChoiceChange}
+          />
+          {choice}
+        </label>
+      ))}
+      {/* </div> */}
       <button
         onClick={handleSubmit}
         className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
