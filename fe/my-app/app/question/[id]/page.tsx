@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import QuestionLayout from "@/components/QuestionLayout";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/utils/supabase/client";
 
 const questions = [
   {
@@ -56,6 +56,7 @@ const QuestionPage: React.FC = () => {
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
   const questionId = parseInt(id, 10);
   const question = questions.find((q) => q.id === questionId);
+  const supabase = createClient();
 
   const [answers, setAnswers] = useState<{ [key: number]: number | number[] }>(
     {}
@@ -95,22 +96,23 @@ const QuestionPage: React.FC = () => {
     if (questionId < questions.length) {
       router.push(`/question/${questionId + 1}`);
     } else {
-      console.log("Completed", answers);
+      // console.log("Completed", answers);
 
       const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
 
-      if (userError || !user) {
+      if (sessionError || !session) {
         console.error("User is not authenticated");
+        // console.log("sessionError:", sessionError, "session:", session);
         return;
       }
 
       const savedAnswers = JSON.parse(localStorage.getItem("answers") || "{}");
 
       const insertData = {
-        user_id: user.id,
+        user_id: session.user.id,
         answers: savedAnswers,
       };
 
