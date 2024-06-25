@@ -1,19 +1,9 @@
-import { supabase, supabaseAdmin } from "@/lib/supabase";
-import Image from "next/image";
+import LoginForm from "@/components/LoginForm";
 
-export default function Home() {
-  const setNewView = async () => {
-    const { data, error } = await supabase.from("countries").insert({
-      name: "Brazil",
-    });
-    if (data) {
-      console.log(data);
-    } else {
-      console.log(error);
-    }
-  };
-
-  setNewView();
-
-  return <div>Hello</div>;
+export default function Home({
+  searchParams,
+}: {
+  searchParams?: { message: string };
+}) {
+  return <LoginForm searchParams={searchParams} />;
 }
