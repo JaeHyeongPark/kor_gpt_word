@@ -2,8 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-
 import { createClient } from "@/utils/supabase/server";
+// import { getAnswers } from "../actions/userInfo";
 
 export async function login(formData: FormData) {
   const supabase = createClient();
@@ -19,6 +19,8 @@ export async function login(formData: FormData) {
   if (error) {
     redirect("/error");
   }
+
+  console.log("session:", session);
 
   revalidatePath("/", "layout");
   redirect("/question/1");
