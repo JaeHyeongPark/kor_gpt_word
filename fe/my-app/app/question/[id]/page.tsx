@@ -8,7 +8,7 @@ import { createClient } from "@/utils/supabase/client";
 const questions = [
   {
     id: 1,
-    question: "여러분의 한국어는 어떠한가요?",
+    question: "Your Korean level?",
     choices: [
       { choice_id: 1, text: "Beginner" },
       { choice_id: 2, text: "Intermediate" },
@@ -18,7 +18,7 @@ const questions = [
   },
   {
     id: 2,
-    question: "어떤 주제에 관심이 가나요?",
+    question: "Favorite topics?",
     choices: [
       { choice_id: 1, text: "Travel" },
       { choice_id: 2, text: "Food" },
@@ -28,7 +28,7 @@ const questions = [
   },
   {
     id: 3,
-    question: "목표가 어떻게 되나요? (해당항목 모두 선택)",
+    question: "Learning goals? (Check all that apply)",
     choices: [
       { choice_id: 1, text: "Speaking" },
       { choice_id: 2, text: "Listening" },
@@ -39,7 +39,7 @@ const questions = [
   },
   {
     id: 4,
-    question: "나이가 어떻게 되나요?",
+    question: "Age range?",
     choices: [
       { choice_id: 1, text: "Under 18" },
       { choice_id: 2, text: "18-25" },
@@ -61,6 +61,7 @@ const QuestionPage: React.FC = () => {
   const [answers, setAnswers] = useState<{ [key: number]: number | number[] }>(
     {}
   );
+  const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
 
   // 컴포넌트가 마운트될 때 로컬 스토리지에서 상태를 읽어오는 로직
   useEffect(() => {
@@ -69,6 +70,18 @@ const QuestionPage: React.FC = () => {
       setAnswers(JSON.parse(savedAnswers));
     }
   }, []); // 빈 배열을 종속성으로 추가하여 컴포넌트가 처음 렌더링될 때 한 번만 실행
+
+  // 현재 질문에 대한 응답 상태를 확인하여 버튼 비활성화 상태를 업데이트
+  useEffect(() => {
+    const currentAnswer = answers[questionId];
+    if (question?.multiple) {
+      setIsSubmitDisabled(
+        !Array.isArray(currentAnswer) || currentAnswer.length === 0
+      );
+    } else {
+      setIsSubmitDisabled(currentAnswer === undefined);
+    }
+  }, [answers, questionId, question]);
 
   if (!question) return <p>Question not found</p>;
 
@@ -96,23 +109,21 @@ const QuestionPage: React.FC = () => {
     if (questionId < questions.length) {
       router.push(`/question/${questionId + 1}`);
     } else {
-      // console.log("Completed", answers);
-
       const {
-        data: { session },
-        error: sessionError,
-      } = await supabase.auth.getSession();
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
 
-      if (sessionError || !session) {
+      if (userError || !user) {
         console.error("User is not authenticated");
-        // console.log("sessionError:", sessionError, "session:", session);
+        console.log("userError:", userError, "user:", user);
         return;
       }
 
       const savedAnswers = JSON.parse(localStorage.getItem("answers") || "{}");
 
       const insertData = {
-        user_id: session.user.id,
+        user_id: user.id,
         answers: savedAnswers,
       };
 
@@ -131,32 +142,40 @@ const QuestionPage: React.FC = () => {
 
   return (
     <QuestionLayout question={question.question} currentQuestion={questionId}>
-      {question.choices.map((choice) => {
-        const isSelected = question.multiple
-          ? ((answers[questionId] as number[]) || []).includes(choice.choice_id)
-          : answers[questionId] === choice.choice_id;
-        return (
-          <div key={choice.choice_id} className="space-y-2">
-            <button
-              type="button"
-              className={`py-3 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-full border ${
-                isSelected
-                  ? "bg-blue-600 text-white"
-                  : "bg-white border-gray-300 text-gray-700"
-              } hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none`}
-              onClick={() => handleChoiceChange(choice.choice_id)}
-            >
-              {choice.text}
-            </button>
-          </div>
-        );
-      })}
-      <button
-        onClick={handleSubmit}
-        className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
-      >
-        Next
-      </button>
+      <div className="flex flex-col space-y-2">
+        {question.choices.map((choice) => {
+          const isSelected = question.multiple
+            ? ((answers[questionId] as number[]) || []).includes(
+                choice.choice_id
+              )
+            : answers[questionId] === choice.choice_id;
+          return (
+            <div key={choice.choice_id}>
+              <button
+                type="button"
+                className={`w-full py-3 px-4 inline-flex items-center gap-x-2 text-sm font-semibold rounded-full border ${
+                  isSelected
+                    ? "bg-blue-600 text-white"
+                    : "bg-white border-gray-300 text-gray-700"
+                } hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none`}
+                onClick={() => handleChoiceChange(choice.choice_id)}
+              >
+                {choice.text}
+              </button>
+            </div>
+          );
+        })}
+      </div>
+      <div className="flex justify-center">
+        <button
+          onClick={handleSubmit}
+          className={`mt-4 text-white px-4 py-2 rounded 
+            ${isSubmitDisabled ? "bg-gray-500" : "bg-blue-500"} `}
+          disabled={isSubmitDisabled}
+        >
+          Next
+        </button>
+      </div>
     </QuestionLayout>
   );
 };
