@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
+import LogoutButton from "@/components/LogoutButton";
 
 const CountdownPage: React.FC = () => {
   const [timeLeft, setTimeLeft] = useState<string>("");
@@ -87,11 +88,19 @@ const CountdownPage: React.FC = () => {
   }, [router, supabase]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
-      <h1 className="text-4xl font-bold">
-        Time left until your next practice:
-      </h1>
-      <p className="text-2xl">{timeLeft}</p>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-white p-4">
+      <header className="py-4 text-black text-center flex justify-between items-center w-full max-w-4xl">
+        <div className="w-20"></div>
+        <div className="text-center">
+          <LogoutButton />
+        </div>
+      </header>
+      <main className="flex flex-1 flex-col items-center justify-center w-full max-w-4xl bg-white p-8 rounded shadow">
+        <h1 className="text-4xl text-black font-bold">
+          Time left until your next practice:
+        </h1>
+        <p className="text-2xl text-black">{timeLeft}</p>
+      </main>
     </div>
   );
 };
