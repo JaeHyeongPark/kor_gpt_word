@@ -10,10 +10,9 @@ const questions = [
     id: 1,
     question: "Your Korean level?",
     choices: [
-      { choice_id: 1, text: "Beginner" },
-      { choice_id: 2, text: "Intermediate" },
-      { choice_id: 3, text: "Advanced" },
-      { choice_id: 4, text: "Native" },
+      { choice_id: 1, text: "I don't know at all" },
+      { choice_id: 2, text: "I know a little" },
+      { choice_id: 3, text: "I know quite a bit" },
     ],
   },
   {
@@ -21,19 +20,22 @@ const questions = [
     question: "Favorite topics?",
     choices: [
       { choice_id: 1, text: "Travel" },
-      { choice_id: 2, text: "Food" },
+      { choice_id: 2, text: "Daily Life" },
       { choice_id: 3, text: "Culture" },
-      { choice_id: 4, text: "Technology" },
+      { choice_id: 4, text: "Family and Relationships" },
+      { choice_id: 5, text: "Greetings and Basic Expressions" },
+      { choice_id: 6, text: "Technology" },
     ],
   },
   {
     id: 3,
     question: "Learning goals? (Check all that apply)",
     choices: [
-      { choice_id: 1, text: "Speaking" },
-      { choice_id: 2, text: "Listening" },
-      { choice_id: 3, text: "Reading" },
-      { choice_id: 4, text: "Writing" },
+      { choice_id: 1, text: "Master the basics" },
+      { choice_id: 2, text: "Talk to native speakers" },
+      { choice_id: 3, text: "Watch movies in Korean" },
+      { choice_id: 4, text: "Learn about Korean culture" },
+      { choice_id: 5, text: "Get top scores on TOPIK" },
     ],
     multiple: true,
   },
@@ -48,7 +50,22 @@ const questions = [
       { choice_id: 5, text: "46+" },
     ],
   },
+  {
+    id: 5,
+    question: "When would you like to practice?",
+    choices: [
+      { choice_id: 1, text: "7AM" },
+      { choice_id: 2, text: "9AM" },
+      { choice_id: 3, text: "1PM" },
+      { choice_id: 4, text: "6PM" },
+      { choice_id: 5, text: "9PM" },
+    ],
+  },
 ];
+
+const getTimezone = () => {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone;
+};
 
 const QuestionPage: React.FC = () => {
   const router = useRouter();
@@ -125,6 +142,8 @@ const QuestionPage: React.FC = () => {
       const insertData = {
         user_id: user.id,
         answers: savedAnswers,
+        timezone: getTimezone(),
+        answers_completed: true,
       };
 
       const { error } = await supabase
