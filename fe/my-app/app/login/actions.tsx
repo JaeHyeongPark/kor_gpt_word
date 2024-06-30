@@ -3,7 +3,6 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/utils/supabase/server";
-// import { getAnswers } from "../actions/userInfo";
 
 export async function login(formData: FormData) {
   const supabase = createClient();
@@ -13,6 +12,7 @@ export async function login(formData: FormData) {
   const data = {
     email: formData.get("email") as string,
     password: formData.get("password") as string,
+    timezone: formData.get("timezone") as string,
   };
 
   const { data: session, error } = await supabase.auth.signInWithPassword(data);
@@ -20,7 +20,13 @@ export async function login(formData: FormData) {
     redirect("/error");
   }
 
-  console.log("session:", session);
+  console.log("timezone 확인 코드:", data.timezone);
+
+  // user_answers 테이블에 user_id가 session.user.id인 레코드의 timezone 열을 data.timezone으로 업데이트
+  await supabase
+    .from("user_answers")
+    .update({ timezone: data.timezone })
+    .eq("user_id", session.user.id);
 
   revalidatePath("/", "layout");
   redirect("/question/1");

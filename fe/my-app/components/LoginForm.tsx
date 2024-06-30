@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { SubmitButton } from "@/app/login/submit-button";
 import { login, signup } from "@/app/login/actions";
@@ -29,7 +31,17 @@ export default function LoginForm({
         </svg>
         Back
       </Link>
-      <form className="flex-1 flex flex-col w-full justify-center gap-2 text-foreground">
+      <form
+        className="flex-1 flex flex-col w-full justify-center gap-2 text-foreground"
+        onSubmit={(e) => {
+          const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+          const timezoneInput = document.createElement("input");
+          timezoneInput.type = "hidden";
+          timezoneInput.name = "timezone";
+          timezoneInput.value = tz;
+          e.currentTarget.appendChild(timezoneInput);
+        }}
+      >
         <label className="text-md" htmlFor="email">
           Email
         </label>
