@@ -1,1 +1,1 @@
-# korean-speaking-gpt
+# korean-gpt-word
