@@ -63,6 +63,10 @@ const questions = [
   },
 ];
 
+const getTimezone = () => {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone;
+};
+
 const QuestionPage: React.FC = () => {
   const router = useRouter();
   const params = useParams();
@@ -138,6 +142,8 @@ const QuestionPage: React.FC = () => {
       const insertData = {
         user_id: user.id,
         answers: savedAnswers,
+        timezone: getTimezone(),
+        answers_completed: true,
       };
 
       const { error } = await supabase

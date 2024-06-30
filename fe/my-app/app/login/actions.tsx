@@ -17,16 +17,30 @@ export async function login(formData: FormData) {
 
   const { data: session, error } = await supabase.auth.signInWithPassword(data);
   if (error) {
+    console.log("1");
     redirect("/error");
   }
-
-  console.log("timezone 확인 코드:", data.timezone);
 
   // user_answers 테이블에 user_id가 session.user.id인 레코드의 timezone 열을 data.timezone으로 업데이트
   await supabase
     .from("user_answers")
     .update({ timezone: data.timezone })
     .eq("user_id", session.user.id);
+
+  const { data: userAnswersDone, error: userAnswersError } = await supabase
+    .from("user_answers")
+    .select("answers_completed")
+    .eq("user_id", session.user.id)
+    .single();
+
+  if (userAnswersError || !userAnswersDone) {
+    return redirect("/question/1");
+  }
+
+  if (userAnswersDone?.answers_completed) {
+    return redirect("/countdown");
+    // return redirect("/question/1");
+  }
 
   revalidatePath("/", "layout");
   redirect("/question/1");
