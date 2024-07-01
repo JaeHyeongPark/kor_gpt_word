@@ -88,7 +88,7 @@ const CountdownPage: React.FC = () => {
   }, [router, supabase]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-white p-4">
+    <div className="flex flex-col items-center justify-center w-full min-h-screen bg-white p-4">
       <header className="py-4 text-black text-center flex justify-between items-center w-full max-w-4xl">
         <div className="w-20"></div>
         <div className="text-center">
