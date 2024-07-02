@@ -154,7 +154,7 @@ const QuestionPage: React.FC = () => {
       } else {
         console.log("Answers saved successfully");
         localStorage.removeItem("answers"); // 저장 후 로컬 스토리지에서 제거
-        router.push("/completed");
+        router.push("/countdown");
       }
     }
   };
