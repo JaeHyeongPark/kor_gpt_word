@@ -3,42 +3,34 @@
 import WordCard from "@/components/WordCard";
 import React, { useState, useEffect } from "react";
 import LogoutButton from "@/components/LogoutButton";
-import { supabase } from "@/lib/supabase/supabase";
 
-interface PracticePageProps {
-  iterations: number;
-}
-
-const PracticePage: React.FC<PracticePageProps> = ({ iterations = 2 }) => {
-  const [wordCards, setWordCards] = React.useState<JSX.Element[]>([]);
+const PracticePage: React.FC = () => {
+  const [wordCards, setWordCards] = useState<JSX.Element[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchWords = async () => {
-      const { data, error } = await supabase.from("words").select("*");
+      const response = await fetch("/api/recommend-words", {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await response.json();
 
-      if (error) {
-        console.error("Error fetching words:", error.message);
-        setLoading(false);
-        return;
-      }
-
-      if (data) {
-        console.log("Fetched words data:", data);
-        const cards = data.map((word, index) => (
+      if (data.words) {
+        const cards = data.words.map((word: any, index: number) => (
           <WordCard
             key={index}
             word={word.word}
-            definition={word.definition}
-            example={word.example}
+            pronounce_eng={word.pronounce_eng}
+            meaning={word.meaning}
+            examples={word.examples}
           />
         ));
         setWordCards(cards);
-        setLoading(false);
-      } else {
-        console.log("No data found in words table.");
-        setLoading(false);
       }
+
+      setLoading(false);
     };
 
     fetchWords();
@@ -53,7 +45,7 @@ const PracticePage: React.FC<PracticePageProps> = ({ iterations = 2 }) => {
         </div>
       </header>
       <main className="flex flex-col items-center justify-center w-full bg-white p-8 rounded shadow">
-        {loading ? <p>Loading</p> : wordCards}
+        {loading ? <p>Loading...</p> : wordCards}
       </main>
     </div>
   );

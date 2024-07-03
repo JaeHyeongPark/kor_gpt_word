@@ -24,7 +24,6 @@ const questions = [
       { choice_id: 3, text: "Culture" },
       { choice_id: 4, text: "Family and Relationships" },
       { choice_id: 5, text: "Greetings and Basic Expressions" },
-      { choice_id: 6, text: "Technology" },
     ],
   },
   {

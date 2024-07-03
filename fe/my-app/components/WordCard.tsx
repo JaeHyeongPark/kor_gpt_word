@@ -1,12 +1,23 @@
 import React from "react";
+import SpeakerIcon from "./Icon/SpeakerIcon";
 
 interface WordCardProps {
   word: string;
-  definition: string;
-  example: string;
+  pronounce_eng: string;
+  meaning: string;
+  examples: {
+    example_1: { eng: string; kor: string };
+    example_2?: { eng: string; kor: string };
+    example_3?: { eng: string; kor: string };
+  };
 }
 
-const WordCard: React.FC<WordCardProps> = ({ word, definition, example }) => {
+const WordCard: React.FC<WordCardProps> = ({
+  word,
+  pronounce_eng,
+  meaning,
+  examples,
+}) => {
   return (
     <div className="bg-white shadow-md rounded-lg p-6 w-full max-w-2xl mx-auto my-6">
       <div className="flex justify-between items-center">
@@ -20,10 +31,34 @@ const WordCard: React.FC<WordCardProps> = ({ word, definition, example }) => {
           </button>
         </div>
       </div>
-      <p className="mt-4 text-xl">{definition}</p>
-      <p className="mt-4 italic text-gray-600">{example}</p>
-
-      <div className="flex justify-between items-center mt-4"></div>
+      <div className="mt-2 flex items-center text-xl text-gray-700">
+        <SpeakerIcon />
+        <span className="ml-2">{pronounce_eng}</span>
+      </div>
+      <p className="mt-4 text-xl">{meaning}</p>
+      <div className="mt-4">
+        <h3 className="text-lg font-semibold">Examples:</h3>
+        <ul className="list-disc list-inside mt-2">
+          {examples.example_1 && (
+            <li>
+              <strong>{examples.example_1.eng}</strong> -{" "}
+              {examples.example_1.kor}
+            </li>
+          )}
+          {examples.example_2 && (
+            <li>
+              <strong>{examples.example_2.eng}</strong> -{" "}
+              {examples.example_2.kor}
+            </li>
+          )}
+          {examples.example_3 && (
+            <li>
+              <strong>{examples.example_3.eng}</strong> -{" "}
+              {examples.example_3.kor}
+            </li>
+          )}
+        </ul>
+      </div>
     </div>
   );
 };
