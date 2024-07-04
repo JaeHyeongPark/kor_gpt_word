@@ -3,12 +3,32 @@
 import Link from "next/link";
 import { SubmitButton } from "@/app/login/submit-button";
 import { login, signup } from "@/app/login/actions";
+import { useEffect, useState } from "react";
 
 export default function LoginForm({
   searchParams,
 }: {
   searchParams?: { message: string };
 }) {
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    const darkModeMediaQuery = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    );
+    setIsDarkMode(darkModeMediaQuery.matches);
+
+    const handleChange = (e: MediaQueryListEvent) => {
+      setIsDarkMode(e.matches);
+    };
+
+    darkModeMediaQuery.addEventListener("change", handleChange);
+
+    return () => {
+      darkModeMediaQuery.removeEventListener("change", handleChange);
+    };
+  }, []);
+
   return (
     <div className="flex-1 flex flex-col w-full px-8 sm:max-w-md justify-center gap-2">
       <Link
@@ -31,6 +51,7 @@ export default function LoginForm({
         </svg>
         Back
       </Link>
+
       <form
         className="flex-1 flex flex-col w-full justify-center gap-2 text-foreground"
         onSubmit={(e) => {
@@ -42,6 +63,22 @@ export default function LoginForm({
           e.currentTarget.appendChild(timezoneInput);
         }}
       >
+        <div className="flex justify-center mb-4">
+          <div
+            className="relative w-full max-w-sm"
+            style={{ aspectRatio: "4 / 1" }}
+          >
+            <img
+              src={
+                isDarkMode
+                  ? "/icons/main_title_white.svg"
+                  : "/icons/main_title_black.svg"
+              }
+              alt="Service Logo"
+              className="absolute inset-0 w-full h-full object-contain"
+            />
+          </div>
+        </div>
         <label className="text-md" htmlFor="email">
           Email
         </label>
