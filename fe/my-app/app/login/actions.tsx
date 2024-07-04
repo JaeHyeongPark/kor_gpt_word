@@ -7,8 +7,6 @@ import { createClient } from "@/utils/supabase/server";
 export async function login(formData: FormData) {
   const supabase = createClient();
 
-  // type-casting here for convenience
-  // in practice, you should validate your inputs
   const data = {
     email: formData.get("email") as string,
     password: formData.get("password") as string,
@@ -17,11 +15,10 @@ export async function login(formData: FormData) {
 
   const { data: session, error } = await supabase.auth.signInWithPassword(data);
   if (error) {
-    console.log("1");
     redirect("/error");
   }
 
-  // user_answers 테이블에 user_id가 session.user.id인 레코드의 timezone 열을 data.timezone으로 업데이트
+  // Update user's timezone in user_answers table
   await supabase
     .from("user_answers")
     .update({ timezone: data.timezone })
@@ -38,8 +35,23 @@ export async function login(formData: FormData) {
   }
 
   if (userAnswersDone?.answers_completed) {
-    return redirect("/countdown");
-    // return redirect("/question/1");
+    // Check user_words to determine if user should be redirected to /practice or /countdown
+    const { data: userWords, error: userWordsError } = await supabase
+      .from("user_words")
+      .select("id")
+      .eq("user_id", session.user.id)
+      .limit(1);
+
+    if (userWordsError) {
+      console.error("Error fetching user words:", userWordsError.message);
+      return redirect("/error");
+    }
+
+    if (userWords.length > 0) {
+      return redirect("/practice");
+    } else {
+      return redirect("/countdown");
+    }
   }
 
   revalidatePath("/", "layout");
@@ -49,8 +61,6 @@ export async function login(formData: FormData) {
 export async function signup(formData: FormData) {
   const supabase = createClient();
 
-  // type-casting here for convenience
-  // in practice, you should validate your inputs
   const data = {
     email: formData.get("email") as string,
     password: formData.get("password") as string,
