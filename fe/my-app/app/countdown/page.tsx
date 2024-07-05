@@ -22,14 +22,14 @@ const CountdownPage: React.FC = () => {
         return;
       }
 
-      const { data: userAnswers, error } = await supabase
+      const { data: userAnswers, error: userAnswersError } = await supabase
         .from("user_answers")
-        .select("answers, timezone")
+        .select("answers, timezone, first_learning_time")
         .eq("user_id", user.id)
         .single();
 
-      if (error) {
-        console.error("Error fetching user answers:", error.message);
+      if (userAnswersError) {
+        console.error("Error fetching user answers:", userAnswersError.message);
         return;
       }
 
@@ -41,12 +41,18 @@ const CountdownPage: React.FC = () => {
 
       const practiceTime = userAnswers.answers[5]; // Access the answer to question 5
       const userTimezone = userAnswers.timezone;
+      const firstLearningTime = userAnswers.first_learning_time;
 
-      // Calculate time left
-      calculateTimeLeft(practiceTime, userTimezone);
+      // Fetch or set first learning time
+      if (!firstLearningTime) {
+        await updateFirstLearningTime(user.id, practiceTime, userTimezone);
+      }
+
+      calculateTimeLeft(practiceTime, userTimezone, firstLearningTime);
     };
 
-    const calculateTimeLeft = async (
+    const updateFirstLearningTime = async (
+      userId: string,
       practiceTime: number,
       userTimezone: string
     ) => {
@@ -58,17 +64,16 @@ const CountdownPage: React.FC = () => {
         5: 21, // 9PM
       };
 
+      const practiceHour = practiceTimeMap[practiceTime];
+      if (practiceHour === undefined) {
+        console.error("Invalid practice time selected.");
+        return;
+      }
+
       const now = new Date();
       const nowInUserTimezone = new Date(
         now.toLocaleString("en-US", { timeZone: userTimezone })
       );
-
-      const practiceHour = practiceTimeMap[practiceTime];
-      if (practiceHour === undefined) {
-        console.error("Invalid practice time selected.");
-        setTimeLeft("Invalid practice time selected.");
-        return;
-      }
 
       const practiceDateTime = new Date(nowInUserTimezone);
       practiceDateTime.setHours(practiceHour, 0, 0, 0);
@@ -77,28 +82,40 @@ const CountdownPage: React.FC = () => {
         practiceDateTime.setDate(practiceDateTime.getDate() + 1);
       }
 
-      const timeDiff = practiceDateTime.getTime() - nowInUserTimezone.getTime();
+      await supabase
+        .from("user_answers")
+        .update({ first_learning_time: practiceDateTime.toISOString() })
+        .eq("user_id", userId);
+    };
+
+    const calculateTimeLeft = async (
+      practiceTime: number,
+      userTimezone: string,
+      firstLearningTime: string
+    ) => {
+      const now = new Date();
+      const nowInUserTimezone = new Date(
+        now.toLocaleString("en-US", { timeZone: userTimezone })
+      );
+
+      const firstLearningDateTime = new Date(firstLearningTime);
+
+      if (firstLearningDateTime <= nowInUserTimezone) {
+        // If it's past the first learning time, redirect to /practice
+        redirectToPractice();
+        return;
+      }
+
+      const timeDiff =
+        firstLearningDateTime.getTime() - nowInUserTimezone.getTime();
       const hours = Math.floor((timeDiff / (1000 * 60 * 60)) % 24);
       const minutes = Math.floor((timeDiff / (1000 * 60)) % 60);
 
       setTimeLeft(`${hours} hours and ${minutes} minutes`);
+    };
 
-      // 학습 시간이 되었을 때 PracticePage로 리디렉션
-      if (timeDiff <= 0) {
-        const response = await fetch("/api/recommend-words");
-        const data = await response.json();
-
-        if (data.error) {
-          console.error("Error fetching recommended words:", data.error);
-          return;
-        }
-
-        // 로컬 스토리지에 추천된 단어와 추천 시간을 저장
-        localStorage.setItem("recommendedWords", JSON.stringify(data.words));
-        localStorage.setItem("seenAt", new Date().toISOString());
-
-        router.push("/practice");
-      }
+    const redirectToPractice = () => {
+      router.push("/practice");
     };
 
     fetchUserAnswers();

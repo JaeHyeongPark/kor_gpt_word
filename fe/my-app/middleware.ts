@@ -46,12 +46,14 @@ export async function middleware(req: NextRequest) {
         }
 
         if (userWords.length > 0) {
+          console.log("user has history");
           return NextResponse.redirect(new URL("/practice", req.url));
         } else {
-          // return NextResponse.redirect(new URL("/countdown", req.url));
-          return NextResponse.redirect(new URL("/practice", req.url));
+          console.log("user has completed answers but no history");
+          return NextResponse.redirect(new URL("/countdown", req.url));
         }
       } else {
+        console.log("user has not completed answers");
         return NextResponse.redirect(new URL("/question/1", req.url));
       }
     }
@@ -70,27 +72,29 @@ export async function middleware(req: NextRequest) {
       }
 
       if (userAnswers?.answers_completed) {
-        return NextResponse.redirect(new URL("/countdown", req.url));
+        const { data: userWords, error: userWordsError } = await supabase
+          .from("user_words")
+          .select("id")
+          .eq("user_id", session.user.id)
+          .limit(1);
+
+        if (userWordsError) {
+          console.error("Error fetching user words:", userWordsError.message);
+          return res;
+        }
+
+        if (userWords.length > 0) {
+          console.log("user has history");
+          return NextResponse.redirect(new URL("/practice", req.url));
+        } else {
+          console.log("user has completed answers but no history");
+          return NextResponse.redirect(new URL("/countdown", req.url));
+        }
+      } else {
+        console.log("user has not completed answers");
+        return NextResponse.redirect(new URL("/question/1", req.url));
       }
     }
-
-    // Restrict access to /practice if user has no study history
-    // if (req.nextUrl.pathname.startsWith("/practice")) {
-    //   const { data: userWords, error: userWordsError } = await supabase
-    //     .from("user_words")
-    //     .select("id")
-    //     .eq("user_id", session.user.id)
-    //     .limit(1);
-
-    //   if (userWordsError) {
-    //     console.error("Error fetching user words:", userWordsError.message);
-    //     return res;
-    //   }
-
-    //   // if (userWords.length === 0) {
-    //   // return NextResponse.redirect(new URL("/practice", req.url));
-    //   // }
-    // }
   }
 
   return res;
