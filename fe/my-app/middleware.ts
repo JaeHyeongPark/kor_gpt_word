@@ -86,9 +86,9 @@ export async function middleware(req: NextRequest) {
         return res;
       }
 
-      if (userWords.length === 0) {
-        return NextResponse.redirect(new URL("/countdown", req.url));
-      }
+      // if (userWords.length === 0) {
+      // return NextResponse.redirect(new URL("/practice", req.url));
+      // }
     }
   }
 
