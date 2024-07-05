@@ -48,7 +48,8 @@ export async function middleware(req: NextRequest) {
         if (userWords.length > 0) {
           return NextResponse.redirect(new URL("/practice", req.url));
         } else {
-          return NextResponse.redirect(new URL("/countdown", req.url));
+          // return NextResponse.redirect(new URL("/countdown", req.url));
+          return NextResponse.redirect(new URL("/practice", req.url));
         }
       } else {
         return NextResponse.redirect(new URL("/question/1", req.url));
