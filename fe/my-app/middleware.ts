@@ -75,22 +75,22 @@ export async function middleware(req: NextRequest) {
     }
 
     // Restrict access to /practice if user has no study history
-    if (req.nextUrl.pathname.startsWith("/practice")) {
-      const { data: userWords, error: userWordsError } = await supabase
-        .from("user_words")
-        .select("id")
-        .eq("user_id", session.user.id)
-        .limit(1);
+    // if (req.nextUrl.pathname.startsWith("/practice")) {
+    //   const { data: userWords, error: userWordsError } = await supabase
+    //     .from("user_words")
+    //     .select("id")
+    //     .eq("user_id", session.user.id)
+    //     .limit(1);
 
-      if (userWordsError) {
-        console.error("Error fetching user words:", userWordsError.message);
-        return res;
-      }
+    //   if (userWordsError) {
+    //     console.error("Error fetching user words:", userWordsError.message);
+    //     return res;
+    //   }
 
-      // if (userWords.length === 0) {
-      // return NextResponse.redirect(new URL("/practice", req.url));
-      // }
-    }
+    //   // if (userWords.length === 0) {
+    //   // return NextResponse.redirect(new URL("/practice", req.url));
+    //   // }
+    // }
   }
 
   return res;
