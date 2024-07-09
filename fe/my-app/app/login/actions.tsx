@@ -31,8 +31,11 @@ export async function login(formData: FormData) {
     .single();
 
   if (userAnswersDone?.answers_completed) {
+<<<<<<< HEAD
     // Check user_words to determine if user should be redirected to /practice or /countdown
 
+=======
+>>>>>>> refs/remotes/origin/main
     return redirect("/practice");
   }
 
