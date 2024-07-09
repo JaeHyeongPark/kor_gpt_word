@@ -30,28 +30,8 @@ export async function login(formData: FormData) {
     .eq("user_id", session.user.id)
     .single();
 
-  if (userAnswersError || !userAnswersDone) {
-    return redirect("/question/1");
-  }
-
   if (userAnswersDone?.answers_completed) {
-    // Check user_words to determine if user should be redirected to /practice or /countdown
-    const { data: userWords, error: userWordsError } = await supabase
-      .from("user_words")
-      .select("id")
-      .eq("user_id", session.user.id)
-      .limit(1);
-
-    if (userWordsError) {
-      console.error("Error fetching user words:", userWordsError.message);
-      return redirect("/error");
-    }
-
-    if (userWords.length > 0) {
-      return redirect("/practice");
-    } else {
-      return redirect("/countdown");
-    }
+    return redirect("/practice");
   }
 
   revalidatePath("/", "layout");
