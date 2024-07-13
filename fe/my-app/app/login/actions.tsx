@@ -32,7 +32,6 @@ export async function login(formData: FormData) {
 
   if (userAnswersDone?.answers_completed) {
     // Check user_words to determine if user should be redirected to /practice or /countdown
-
     return redirect("/practice");
   }
 
